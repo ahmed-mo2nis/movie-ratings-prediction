@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is a Regression project done at [K2 Data Science](http://k2datascience.com). I would like to design a machine learning pipeline to model how renowned late movie critic Roger Ebert would review movies today.
+This is a Classification project done at [K2 Data Science](http://k2datascience.com). I would like to design a machine learning pipeline to model how renowned late movie critic Roger Ebert would review movies today.
 
 With the abundance of data on movies, scripts, reviews, and forums for everyone - critics and general audience to express their opinion on movies - can I try to model Ebert's movie ratings against everyone else's?
 
@@ -86,38 +86,21 @@ We can also see that Horror movies indeed get lower ratings like we suspected fr
 
 ## Modeling
 
-I started by creating a linear regression model without most of the high-dimensional dummy variables (actors, directors, genres, decades, MPAA ratings). I ran a few different combinations of the remaining features and ended up selecting the one with several of the numeric columns and the dummy variables for Season. The R-squared value was 0.38, meaning that approximately 38% of the variation in Ebert Stars was explained by the input features.
+I looped through a variety of classification algorithms: probabilistic, distance, linear model and gradient-boosting. The results were not great and it seemed hard to eek out any solid results.
 
-![OLS](reports/figures/ols_results.png)
+![Logistic Regression Precision-Recall Curve](reports/figures/lr_recall_curve.png)
 
-![Leverage](reports/figures/normalized.png)
+Here is the confusion matrix from a basic `SGDClassifier`.
 
-![Fitted](reports/figures/fitted.png)
+![Confusion Matrix](reports/figures/sgd_cmatrix.png)
 
-I then chose to use Lasso to help me add all features I had at hand and perform feature subset selection. [Lasso](http://scikit-learn.org/stable/modules/linear_model.html#lasso) (which uses `L1` penalty) is very useful when we have high-dimensional data and a sparse solution like I believed to be the case here. Instead of just reducing the coefficients like Ridge Regression (which uses `L2` penalty) does it actually brings them to zero if the feature is not a good predictor — effectively accomplishing feature subset selection. I also created an algorithm to choose Lasso's hyperparameter `alpha` so that it maximizes `R`<sup>`2`</sup>.
+## Lessons Learned and Further Research
 
-Lasso selected 393 features - about only 8% of the 4801 features I originally fed the algorithm with. In addition to some of the features present in the previous model, it selected a couple of MPAA and decade dummy variables, as well as 7 genres and about 375 stars and directors. However, the `R`<sup>`2`</sup> and Mean Squared Error metrics were only slightly better than the ones from the previous model.
+In the end, the modeling approach performed as well as a dummy classifier that simply picked the most common class. I could definitely shift the threshold in favor of precision, but recall would plummet to 0. In this example, I'd rather watch only good movies and have a few false positives (bad movies recommended), even if that means missing a bunch of good ones. However, in a realistic scenario, an extreme decision approach would not be recommended.
 
-I've identified that the model was underfitting for a couple of reasons. For one, the learning curves showed that more data would be helpful since the training and test curves were a relatively long way to converging.  More importantly, the training `R`<sup>`2`</sup> was low at about 0.59, which showed that even if I added more data my model was still going to be far from a good `R`<sup>`2`</sup> of, let's say, 0.9.
+It may be impossible to model Roger Ebert's interpretation of movies. Although many movies are generally accepted as true, there is a fair amount of subjectivity when it comes to critiquing movies. Most likely, I would need to add better features. Off the top of my head, using natural language processing to extract topics, keywords and sentiment could definitely hit at whether the review is positive or negative.
 
-![Learning-Curves](reports/figures/learning-curves.png)
-
-## Lessons Learned
-
-I learned several concepts during this project. I implemented many new packages involved with scraping and explored the nuances of the statsmodels API. I also learned how to use Lasso regression and its feature subset selection to deal with high-dimensional data. Plotting learning curves with Scikit-learn also showed to be very helpful.
-
-## Further Analysis
-
-If I had more time with the project, I would complete the following tasks:
-- Try to add more features that could be good predictors, for example:
-  - budget
-  - box office
-  - screenwriter
-  - studio
-  - awards won by movies/actors/directors
-  - whether a movie is part of a series
-- Try to get a dataset similar to Metascore but with fewer non-existent values (maybe RottenTomatoes). Dropping many examples from the original dataset because Metascore didn't have data on them made the model underfit even more.
-- Build a web app where individuals could put in movie attributes and spit out the projected Ebert rating
+At the same time, I realize that many of the features may not be available at the time of movie release and some of them are available within 2 weeks or even 2 months after the theatrical release. I'd need to narrow down the evaluation metric and features that would be usable if I were to continue working on this project.
 
 ## Code Information
 
