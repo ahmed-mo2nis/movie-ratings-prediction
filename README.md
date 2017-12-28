@@ -1,4 +1,4 @@
-# Movie Regression Project
+# Classification Project
 
 ## Introduction
 
